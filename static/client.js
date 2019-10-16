@@ -1,4 +1,4 @@
-console.log({ data })
+console.log({ d: data.out })
 
 // 2. Use the margin convention practice 
 const margin = {top: 50, right: 50, bottom: 50, left: 50};
@@ -62,10 +62,11 @@ svg.append("path")
     .attr("stroke", "green")
     .attr("d", outLine); // 11. Calls the line generator 
 
-// 12. Appends a circle for each datapoint 
+// 12. Appends a circle for each datapoint
+
 svg.selectAll(".dot")
-    .data(dataset1)
-  .enter().append("circle") // Uses the enter().append() method
+    .data(dataset2)
+    .enter().append("circle") // Uses the enter().append() method
     .attr("class", "dot") // Assign a class for styling
     .attr("cx", (d, i) =>  (xScale(d[0])))
     .attr("cy", (d) => (yScale(d[1])))
@@ -73,4 +74,16 @@ svg.selectAll(".dot")
       .on("mouseover", (a, b, c) => { 
   			console.log(a) 
         //this.attr('class', 'focus')
-		})
+    })
+
+
+svg.selectAll(".dot2")
+    .data(dataset2).filter((d, i) => d)
+    .enter().append("circle") // Uses the enter().append() method
+    .attr("class", "dot2") // Assign a class for styling
+    .attr("cx", (d, i) =>  (xScale(d[0])))
+    .attr("cy", (d) => (yScale(d[1])))
+    .attr("r", 15)
+    .attr("fill", "none")
+    .attr("stroke", "black")
+
