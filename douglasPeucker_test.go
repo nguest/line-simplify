@@ -12,7 +12,6 @@ func TestDiff(t *testing.T) {
 	v2 := Datum{5, 20, 0, tn}
 	t.Run("same vector", testFuncDiff(v1, v1, Datum{Lat: 0, Lon: 0, Alt: 0, Ts: time.Time{}}))
 	t.Run("non-zero vectors", testFuncDiff(v1, v2, Datum{Lat: 5, Lon: 10, Alt: 0, Ts: time.Time{}}))
-
 }
 
 func testFuncDiff(v1, v2, want Datum) func(*testing.T) {

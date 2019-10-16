@@ -16,11 +16,8 @@ func index(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	in, err := ReadAndParse("sampleTracks/sample1.igc")
-	out := DouglasPeucker(in.Data, 0.012)
+	out := DouglasPeucker(in.Data, 0.02)
 
-	fmt.Println(in)
-
-	// in, out := GetResult()
 	var X struct {
 		In  [][]float64 `json:"in"`
 		Out [][]float64 `json:"out"`

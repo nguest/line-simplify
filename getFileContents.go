@@ -95,7 +95,7 @@ func parseIGC(lines []string) (TrackData, error) {
 		}
 	}
 
-	//trackData.StartEndDistance = GetTotalTrackLength(data)
+	trackData.StartEndDistance = GetTotalTrackLength(data)
 	trackData.Data = data
 	trackData.Date = data[0].Ts
 
