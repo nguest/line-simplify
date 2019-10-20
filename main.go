@@ -16,7 +16,8 @@ func index(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	in, err := ReadAndParse("sampleTracks/sample1.igc")
-	out := DouglasPeucker(in.Data, 0.02)
+	//out := DouglasPeucker(in.Data, 0.01, 0)
+	out := DPByCount(in.Data, 10)
 
 	var X struct {
 		In  [][]float64 `json:"in"`
@@ -29,8 +30,6 @@ func index(w http.ResponseWriter, r *http.Request) {
 		X.In = append(X.In, []float64{v.Lon, v.Lat})
 	}
 	json.Marshal(X)
-	t.Execute(w, X)
-	//X := "hello"
 	t.Execute(w, X)
 }
 

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math"
+	"sort"
 	"time"
 )
 
@@ -42,47 +43,109 @@ func PerpendicularDistance(v Datum, line Line) float64 {
 	return math.Abs(x) / l
 }
 
+// DouglasPeucker simple Douglas-Peucker algorithm with tolerance e
 func DouglasPeucker(data []Datum, e float64) []Datum {
-	fmt.Println(len(data))
-
 	// Find the point with the maximum distance
 	dMax := 0.0
 	idx := 0
 	end := len(data) - 1
-	//fmt.Println("datain", data)
+
 	for i := 0; i <= end; i++ {
 		line := Line{
 			V1: data[0],
 			V2: data[end],
 		}
-		//fmt.Println("input", data[i], line)
 		d := PerpendicularDistance(data[i], line)
 
 		if d > dMax {
 			idx = i
 			dMax = d
-			//fmt.Println("d", dMax)
 		}
 	}
 
 	var Res []Datum
+
 	if dMax > e && idx > 1 {
-		//if len(data) > 5 && idx > 1 {
-		//fmt.Println("dMax", dMax, data, idx)
 		// Recursive call
 		recR1 := DouglasPeucker(data[0:idx], e)
 		recR2 := DouglasPeucker(data[idx:end], e)
 		// Build the result list
 		Res = append(recR1[0:len(recR1)-1], recR2[0:len(recR2)]...)
+		fmt.Println("case1", dMax, e)
+
 	} else {
-		//	fmt.Println("x", data)
 		if len(data) > 1 {
+			fmt.Println("case2")
+
 			Res = []Datum{data[0], data[end-1]}
 		} else {
 			Res = data
 		}
 
 	}
-	//fmt.Println("Res", Res)
+	fmt.Println("Res len", len(Res), len(data))
 	return Res
+}
+
+func DPByCount(data []Datum, count int) []Datum {
+	len := len(data)
+	weights := make([]float64, len)
+	var dP func(int, int)
+
+	dP = func(start, end int) {
+		if end <= start+1 {
+			return
+		}
+
+		line := Line{
+			V1: data[start],
+			V2: data[end],
+		}
+		dMax := -1.0
+		idx := 0
+		d := 0.0
+		for i := start + 1; i < end; i++ {
+			d = PerpendicularDistance(data[i], line)
+			if d > dMax {
+				dMax = d
+				idx = i
+			}
+		}
+		weights[idx] = dMax
+		fmt.Println("idx", start, idx, end)
+
+		dP(start, idx)
+		dP(idx, end)
+
+	}
+
+	dP(0, len-1)
+
+	// make sure first and last point always included
+	weights[0] = math.MaxFloat64
+	weights[len-1] = math.MaxFloat64
+
+	// sort []weights descending, to calculate maxT max tolerance
+	weightsDesc := make([]float64, len)
+	copy(weightsDesc, weights)
+	sort.Slice(weightsDesc, func(i, j int) bool {
+		return weightsDesc[i] > weightsDesc[j]
+	})
+	maxT := weightsDesc[count-1]
+
+	// filter correct highest-weighted points into []dataOut
+	n := 0
+	dataOut := make([]Datum, count)
+	for i, x := range data {
+		if weights[i] >= maxT {
+			fmt.Println("x", i)
+			dataOut[n] = x
+			n++
+		}
+	}
+	fmt.Println("weights", weights[:n])
+
+	data = data[:n]
+	//fmt.Println("data", dataOut)
+	return dataOut
 }
