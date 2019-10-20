@@ -143,9 +143,6 @@ func DPByCount(data []Datum, count int) []Datum {
 			n++
 		}
 	}
-	fmt.Println("weights", weights[:n])
 
-	data = data[:n]
-	//fmt.Println("data", dataOut)
 	return dataOut
 }
