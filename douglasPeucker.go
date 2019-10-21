@@ -7,7 +7,6 @@ import (
 	"time"
 )
 
-// Datum is an object with props lat/lon/alt/timestamp for a point on the track.
 type Datum struct {
 	Lat float64   `json:"lat"`
 	Lon float64   `json:"lon"`
@@ -87,6 +86,7 @@ func DouglasPeucker(data []Datum, e float64) []Datum {
 	return Res
 }
 
+// DPByCount implements Douglas Peucker but with  a given pointscount for the result set
 func DPByCount(data []Datum, count int) []Datum {
 	len := len(data)
 	weights := make([]float64, len)

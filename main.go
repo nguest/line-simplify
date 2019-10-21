@@ -16,12 +16,13 @@ func index(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 	in, err := ReadAndParse("sampleTracks/sample1.igc")
-	//out := DouglasPeucker(in.Data, 0.01, 0)
+
 	out := DPByCount(in.Data, 5)
 
 	var X struct {
-		In  [][]float64 `json:"in"`
-		Out [][]float64 `json:"out"`
+		In      [][]float64 `json:"in"`
+		Out     [][]float64 `json:"out"`
+		OutDist float64     `json:"outDist"`
 	}
 	for _, v := range out {
 		X.Out = append(X.Out, []float64{v.Lon, v.Lat})
@@ -29,6 +30,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 	for _, v := range in.Data {
 		X.In = append(X.In, []float64{v.Lon, v.Lat})
 	}
+	X.OutDist = GetTotalTrackLength(out)
 	json.Marshal(X)
 	t.Execute(w, X)
 }
@@ -43,7 +45,4 @@ func handleRequests() {
 
 func main() {
 	handleRequests()
-
-	// fmt.Println("finalRESULT", DouglasPeucker([]Datum{{0, 0}, {1, 0.1}, {2, -0.1},
-	// 	{3, 5}, {4, 6}, {5, 7}, {6, 8.1}, {5, 9}, {8, 9}, {9, 9}, {10, 8}, {11, 8.5}}, 1))
 }

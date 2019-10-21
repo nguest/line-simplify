@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -49,45 +50,24 @@ func testFuncPerpDist(v Datum, line Line, want float64) func(t *testing.T) {
 
 func TestDouglasPeucker(t *testing.T) {
 	//t.Run
-	data0 := []Datum{}
-	data1 := []Datum{
-		Datum{
-			Lat: 21.0,
-			Lon: 10.0,
-		},
-		Datum{
-			Lat: 18.0,
-			Lon: 12.0,
-		},
-		Datum{
-			Lat: 22.0,
-			Lon: 11.0,
-		},
-	}
-	data2 := []Datum{
-		Datum{
-			Lat: -21.0,
-			Lon: -10.0,
-		},
-		Datum{
-			Lat: -18.0,
-			Lon: -12.0,
-		},
-		Datum{
-			Lat: -22.0,
-			Lon: -11.0,
-		},
-	}
+	tn := time.Now()
 
-	t.Run("zeroes", testFuncDP(data0, 0))
-	t.Run("positive points", testFuncDP(data1, 850.8496136907015))
-	t.Run("negative points", testFuncDP(data2, 850.8496136907015))
+	data0 := []Datum{
+		{0.0, 0.0, 0, tn}, {5.0, 6.0, 0, tn}, {11.0, 110.0, 0, tn},
+		{11.0, 40.0, 0, tn}, {19.0, 12.0, 0, tn}, {22.0, 5.0, 0, tn},
+		{21.0, 8.0, 0, tn}, {19.0, 12.0, 0, tn}, {20.0, 20.0, 0, tn},
+		{91.0, 15.0, 0, tn}, {19.0, 12.0, 0, tn}, {22.0, 14.0, 0, tn},
+	}
+	data1 := []Datum{{0.0, 0.0, 0, tn}, {11.0, 110.0, 0, tn}, {91.0, 15.0, 0, tn}}
+	data2 := []Datum{}
+	t.Run("normal data", testFuncDP(data0, data1))
+	t.Run("one point", testFuncDP(data2, data2))
 }
 
-func testFuncDP(data []Datum, want float64) func(*testing.T) {
+func testFuncDP(data []Datum, want []Datum) func(*testing.T) {
 	return func(t *testing.T) {
-		got := GetTotalTrackLength(data)
-		if got != want {
+		got := DouglasPeucker(data, 5.5)
+		if !reflect.DeepEqual(got, want) {
 			fmt.Printf("WANT: %+v\n GOT: %+v\n", want, got)
 			t.FailNow()
 		}
