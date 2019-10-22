@@ -4,7 +4,12 @@ Go implementation of line simplification algorithms, with results plotted using 
 
 This work is specifically for simplification of GPS track plots, in the example case for FAI/IGC Flight Recorder Data Format files (e.g. for paragliding, sailplane flying etc).
 
+Currently all distances between points for the algorithms are on a straight-line basis- ultimately it could make sense to calculate them using the Haversine formula, which takes into account the curve of the earth. Total distances of the results are computed this way.
+
 ## Example Plot
+
+A tracklog from a cross-country paragliding flight in Colombia provides the input dataset.
+Total lengths of tracklogs for the original info and for the results of each simplification algorithm are shown.
 
 ![Example Plot](static/example-plot.png "Example Plot")
 

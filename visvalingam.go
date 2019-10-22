@@ -5,39 +5,30 @@ import (
 )
 
 type Item struct {
-	a    float64
-	pIdx int
-	next *Item
-	prev *Item
-	idx  int
+	a    float64 // triangle area * 2 (save one unnecessary multiplication)
+	pIdx int     // index of point in original path
+	next *Item   // to keep a virtual linked list for rebuild of triangle areas as we remove points
+	prev *Item   // to keep a virtual linked list for rebuild of triangle areas as we remove points
+	idx  int     // internal index in heap, for removal and update
 }
 
+// Visvalingam line simplification algorithm - data (points), count (desired point count)
 func Visvalingam(data []Datum, count int) []Datum {
-	var idxMap []int
-	if len(data) <= count {
-		idxMap = make([]int, len(data))
-		for i := range data {
-			idxMap[i] = i
-		}
-	}
-
-	// threshoold?
-
 	removed := 0
 
 	// build initial heap
 	heap := minHeap(make([]*Item, 0, len(data)))
 
-	linkedListStart := &Item{
+	listStart := &Item{
 		a:    math.Inf(1),
 		pIdx: 0,
 	}
-	heap.Push(linkedListStart)
+	heap.Push(listStart)
 
 	// make path Items, exclude start and end
 	items := make([]Item, len(data))
 
-	prev := linkedListStart
+	prev := listStart
 	for i := 1; i < len(data)-1; i++ {
 		item := &items[i]
 		item.a = area(data, i-1, i, i+1)
@@ -86,17 +77,18 @@ func Visvalingam(data []Datum, count int) []Datum {
 		}
 	}
 
-	item := linkedListStart
+	item := listStart
 
 	cnt := 0
 	for item != nil {
 		data[cnt] = data[item.pIdx]
-		cnt++
 		item = item.next
+		cnt++
 	}
 	return data[:cnt]
 }
 
+// minheap logic
 type minHeap []*Item
 
 func (h *minHeap) Push(item *Item) {

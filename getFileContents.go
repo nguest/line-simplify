@@ -23,7 +23,6 @@ func readLocalFile(filepath string) ([]string, error) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("Successfully Opened", filepath)
 	defer file.Close()
 
 	var lines []string
@@ -90,7 +89,6 @@ func parseIGC(lines []string) (TrackData, error) {
 				Alt: gpsAlt,
 				Ts:  getTimeStamp(rawDate, rawTimeOfDay),
 			}
-			// fmt.Println("{", dataItem.Lon, ",", dataItem.Lat, "},")
 			data = append(data, dataItem)
 		}
 	}
@@ -105,18 +103,5 @@ func parseIGC(lines []string) (TrackData, error) {
 func getTimeStamp(rawDate string, rawTimeOfDay string) time.Time {
 	rawTimeStamp := fmt.Sprintf("%s%s", rawDate, rawTimeOfDay)
 	parsedTime, _ := time.Parse("020106150405", rawTimeStamp)
-	//timeStamp := parsedTime.Format("Mon, 02 Jan 2006 15:04:05 -0700")
 	return parsedTime
 }
-
-// HFDTE 311011
-// HFDTEDATE: 250819,01
-
-// B 210939 4531841N 12240920W A0000000018
-// B 112840 4624845N 00806464E A0214502144005003001258179
-
-// "B%2u%2u%2u%2u%2u%3u%1[NS]%3u%2u%3u%1[WE]%c%5d%5d",
-// 		       &hours, &mins, &secs, &lat_deg, &lat_min, &lat_frac,
-// 		       lat_hemi, &lon_deg, &lon_min, &lon_frac, lon_hemi,
-// 		       &validity, &pres_alt, &gnss_alt) != 14) {
-//     fatal(MYNAME ": fix (B) record parse error\n%s\n", ibuf);

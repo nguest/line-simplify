@@ -18,6 +18,7 @@ func degToRad(deg float64) float64 {
 	return math.Pi * deg / 180
 }
 
+// haversine computes the distance between two points in km taking into account the curve of the earth
 func haversine(p1, p2 Datum) float64 {
 	R := 6371.0 // km
 	φ1 := degToRad(p1.Lat)

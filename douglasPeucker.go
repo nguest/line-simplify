@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	"sort"
 	"time"
@@ -70,19 +69,13 @@ func DouglasPeucker(data []Datum, e float64) []Datum {
 		recR2 := DouglasPeucker(data[idx:end], e)
 		// Build the result list
 		Res = append(recR1[0:len(recR1)-1], recR2[0:len(recR2)]...)
-		fmt.Println("case1", dMax, e)
-
 	} else {
 		if len(data) > 1 {
-			fmt.Println("case2")
-
 			Res = []Datum{data[0], data[end-1]}
 		} else {
 			Res = data
 		}
-
 	}
-	fmt.Println("Res len", len(Res), len(data))
 	return Res
 }
 
@@ -104,6 +97,7 @@ func DPByCount(data []Datum, count int) []Datum {
 		dMax := -1.0
 		idx := 0
 		d := 0.0
+
 		for i := start + 1; i < end; i++ {
 			d = PerpendicularDistance(data[i], line)
 			if d > dMax {
@@ -111,12 +105,11 @@ func DPByCount(data []Datum, count int) []Datum {
 				idx = i
 			}
 		}
+
 		weights[idx] = dMax
-		fmt.Println("idx", start, idx, end)
 
 		dP(start, idx)
 		dP(idx, end)
-
 	}
 
 	dP(0, len-1)
@@ -138,7 +131,6 @@ func DPByCount(data []Datum, count int) []Datum {
 	dataOut := make([]Datum, count)
 	for i, x := range data {
 		if weights[i] >= maxT {
-			fmt.Println("x", i)
 			dataOut[n] = x
 			n++
 		}
