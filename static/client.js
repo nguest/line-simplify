@@ -1,26 +1,28 @@
 console.log({ d: data })
 
-// 2. Use the margin convention practice 
+// Set margins for svg 
 const margin = {top: 50, right: 50, bottom: 50, left: 50};
-const width = window.innerWidth - margin.left - margin.right; // Use the window's width 
-const height = window.innerHeight - margin.top - margin.bottom; // Use the window's height
+const width = window.innerWidth - margin.left - margin.right;
+const height = window.innerHeight - margin.top - margin.bottom;
 
-const datasetIn = data.in;// d3.range(n).map((d) => ([d3.randomUniform(1)(), d3.randomUniform(1)()]));
-const datasetDP = data.outDP;
-const datasetVis = data.outVis;
+const datasetIn = data.in.line;
+const datasetDP = data.outDP.line;
+const datasetVis = data.outVis.line;
 
-const colorIn = "red";
-const colorDP = "green";
-const colorVis = "blue";
+const colors = [
+    "red",
+    "green",
+    "blue"
+]
 
-// scales
+// Scales
 const xScale = d3.scaleLinear()
-    .domain([d3.min(datasetIn, (d) => d[0]), d3.max(datasetIn, (d) => d[0])]) // input
-    .range([0, width]); // output
+    .domain([d3.min(datasetIn, (d) => d[0]), d3.max(datasetIn, (d) => d[0])])
+    .range([0, width]);
 
 const yScale = d3.scaleLinear()
-    .domain([d3.min(datasetIn, (d) => d[1]), d3.max(datasetIn, (d) => d[1])]) // input 
-    .range([height, 0]); // output 
+    .domain([d3.min(datasetIn, (d) => d[1]), d3.max(datasetIn, (d) => d[1])])
+    .range([height, 0]); 
 
 // Line generator
 const inLine = d3.line()
@@ -42,13 +44,13 @@ const svg = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-// Call the x axis in a group tag
+// Call x axis in a group tag
 svg.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(xScale)); // Create an axis component with d3.axisBottom
 
-// Call the y axis in a group tag
+// Call y axis in a group tag
 svg.append("g")
     .attr("class", "y axis")
     .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
@@ -57,20 +59,20 @@ svg.append("g")
 svg.append("path")
     .datum(datasetIn)
     .attr("fill", "none")
-    .attr("stroke", colorIn)
-    .attr("d", inLine)
+    .attr("stroke", colors[0])
+    .attr("d", inLine);
 
 svg.append("path")
     .datum(datasetDP)
     .attr("fill", "none")
-    .attr("stroke", colorDP)
-    .attr("d", outLineDP)
+    .attr("stroke", colors[1])
+    .attr("d", outLineDP);
 
 svg.append("path")
     .datum(datasetVis)
     .attr("fill", "none")
-    .attr("stroke", colorVis)
-    .attr("d", outLineVis)
+    .attr("stroke", colors[2])
+    .attr("d", outLineVis);
 
 // Append a circle for each datapoint
 svg.selectAll(".dotDP")
@@ -82,11 +84,11 @@ svg.selectAll(".dotDP")
     .attr("r", 10)
     .attr("fill", "none")
     .attr("strokeWidth", "1")
-    .attr("stroke", colorDP)
+    .attr("stroke", colors[1])
     .on("mouseover", (a, b, c) => { 
   	    console.log(a) 
         //this.attr('class', 'focus')
-    })
+    });
 
 svg.selectAll(".dotVis")
     .data(datasetVis)
@@ -97,8 +99,27 @@ svg.selectAll(".dotVis")
     .attr("r", 10)
     .attr("fill", "none")
     .attr("strokeWidth", "1")
-    .attr("stroke", colorVis)
+    .attr("stroke", colors[2])
     .on("mouseover", (a, b, c) => { 
   	    console.log(a) 
-        //this.attr('class', 'focus')
-    })
+    });
+
+// append some legends
+const addLegends = () => {
+    Object.keys(data).forEach((dataSet, i) => {
+        svg.append("text")
+            .attr("x", 10)
+            .attr("y", 10 + 20*i)
+            .text(data[dataSet].title)
+            .attr("fill", colors[i])
+            .attr("font-size", "15px")//.attr("alignment-baseline","middle")
+            .attr("font-family", "monospace");
+        svg.append("text")
+            .attr("x", 160)
+            .attr("y", 10 + 20*i)
+            .text(`${data[dataSet].dist.toFixed(1)} km`)
+            .style("font-size", "15px")
+            .attr("font-family", "monospace");
+    })    
+}
+addLegends();
