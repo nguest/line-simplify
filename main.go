@@ -17,7 +17,8 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}
 	in, err := ReadAndParse("sampleTracks/sample1.igc")
 
-	out := DPByCount(in.Data, 5)
+	//out := DPByCount(in.Data, 5)
+	out := Visvalingam(in.Data, 5)
 
 	var X struct {
 		In      [][]float64 `json:"in"`

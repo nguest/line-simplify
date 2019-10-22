@@ -1,16 +1,8 @@
 package main
 
-import "math"
-
-// type TriP struct {
-// 	v0, v1, v2 Datum
-// 	a          float64
-// }
-// type Triangle struct {
-// 	p    TriP
-// 	prev *Triangle
-// 	next *Triangle
-// }
+import (
+	"math"
+)
 
 type Item struct {
 	a    float64
@@ -34,7 +26,7 @@ func Visvalingam(data []Datum, count int) []Datum {
 	removed := 0
 
 	// build initial heap
-	heap := minHeap(make([]*Item, len(data)))
+	heap := minHeap(make([]*Item, 0, len(data)))
 
 	linkedListStart := &Item{
 		a:    math.Inf(1),
@@ -109,64 +101,88 @@ type minHeap []*Item
 
 func (h *minHeap) Push(item *Item) {
 	item.idx = len(*h)
+	*h = append(*h, item)
+	h.up(item.idx)
 }
 
 func (h *minHeap) Pop() *Item {
-	item.idx = len(*h)
+	removed := (*h)[0]
+	lastItem := (*h)[len(*h)-1]
+	(*h) = (*h)[:len(*h)-1]
+
+	if len(*h) > 0 {
+		lastItem.idx = 0
+		(*h)[0] = lastItem
+		h.down(0)
+	}
+
+	return removed
 }
 
 func (h *minHeap) Update(item *Item, a float64) {
-	item.idx = len(*h)
+	if item.a > a {
+		// area became smaller
+		item.a = a
+		h.up(item.idx)
+	} else {
+		// area became larger
+		item.a = a
+		h.down(item.idx)
+	}
 }
 
-// 	heap := []Triangle{} //minHeap()
-// 	maxA := 0.0
-// 	t := Triangle{}
-// 	ts := []Triangle{}
+func (h minHeap) up(i int) {
+	obj := h[i]
+	for i > 0 {
+		up := ((i + 1) >> 1) - 1
+		parent := h[up]
+		if parent.a <= obj.a {
+			// parent smaller so get out of heap ops
+			break
+		}
 
-// 	//data = data.map(function (d) { return d.slice(0,2); });
-// 	for i, v := range data {
-// 		data[i] = v
-// 	}
+		// swap nodes around
+		parent.idx = i
+		h[i] = parent
+		obj.idx = up
+		h[up] = obj
+	}
+}
 
-// 	// calculate triangles and their areas
-// 	for i := 1; i < len(data)-2; i++ {
-// 		t := Triangle{
-// 			p: TriP{
-// 				v0: data[i-1],
-// 				v1: data[i],
-// 				v2: data[i+1],
-// 				a:  area(t),
-// 			},
-// 		}
+func (h minHeap) down(i int) {
+	obj := h[i]
 
-// 		if t.p.a > 0 {
-// 			ts = append(ts, t)
-// 			Push(heap, t)
-// 		}
-// 	}
+	for {
+		right := (1 + i) << 1
+		left := right - 1
+		down := i
+		child := h[down]
 
-// 	for i := 0; i < len(ts)-1; i++ {
-// 		t = ts[i]
-// 		t.prev = &ts[i-1]
-// 		t.next = &ts[i+1]
-// 	}
-// 	///////
-// 	if t.p.a < maxA {
-// 		t.p.a = maxA
-// 	} else {
-// 		maxA = t.p.a
-// 	}
+		// swap with smallest child
+		if left < len(h) && h[left].a < child.a {
+			down = left
+			child = h[down]
+		}
 
-// 	if t.prev != nil {
-// 		t.prev.next = t.next
-// 		t.prev.p[2] = t.p[2]
-// 		update(heap, t.prev)
-// 	} else {
-// 		t.p[0] = t.a
-// 	}
+		if right < len(h) && h[right].a < child.a {
+			down = right
+			child = h[down]
+		}
 
-// }
+		// quit if none smaller
+		if down == i {
+			break
+		}
+
+		// swap nodes around
+		child.idx = i
+		h[child.idx] = child
+		obj.idx = down
+		h[down] = obj
+		i = down
+	}
+}
+
 // returns double the triangle area
 func area(data []Datum, i0, i1, i2 int) float64 {
 	v0 := data[i0]
@@ -176,54 +192,3 @@ func area(data []Datum, i0, i1, i2 int) float64 {
 	return math.Abs(
 		v0.Lon*(v1.Lat-v2.Lat) + v1.Lon*(v2.Lat-v0.Lat) + v2.Lon*(v0.Lat-v1.Lat))
 }
-
-// func minHeap() {
-
-// }
-
-// func Push(heap []Triangle, t Triangle) int {
-// 	//for i := 0, n = arguments.length; i < n; ++i {
-// 	var object = t
-// 	heap = append(heap, object)
-// 	Up(heap, append(heap, object))
-
-// 	return len(heap)
-// }
-
-// func Up(ts []Triangle, i int) {
-// 	object := ts[i]
-// 	for i > 0 {
-// 		up := ((i + 1) >> 1) - 1
-// 		parent := ts[up]
-// 		if CompareArea(object, parent) >= 0 {
-// 			break
-// 		}
-// 		ts[i] = parent
-// 		ts[up] = object
-// 	}
-// }
-
-// func Down(ts []Triangle, i int) {
-// 	var object = ts[i]
-// 	right := (i + 1) * 2
-// 	left := right - 1
-// 	down := i
-// 	child := ts[down]
-// 	for {
-// 		if left < len(ts) && CompareArea(ts[left], child) < 0 {
-// 			child = ts[left]
-// 		}
-// 		if right < len(ts) && CompareArea(ts[right], child) < 0 {
-// 			child = ts[right]
-// 		}
-// 		if down == i {
-// 			break
-// 		}
-// 		ts[i] = child
-// 		ts[down] = object
-// 	}
-// }
-
-// func CompareArea(t1, t2 Triangle) float64 {
-// 	return t1.a - t2.a
-// }
