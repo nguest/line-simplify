@@ -17,21 +17,30 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}
 	in, err := ReadAndParse("sampleTracks/sample1.igc")
 
-	//out := DPByCount(in.Data, 5)
-	out := Visvalingam(in.Data, 5)
+	outDP := DPByCount(in.Data, 5)
+	outVis := Visvalingam(in.Data, 5)
+
+	var L struct {
+		Line [][]float64 `json:"line"`
+		Dist float64     `json:"dist"`
+	}
 
 	var X struct {
 		In      [][]float64 `json:"in"`
-		Out     [][]float64 `json:"out"`
+		OutDP   [][]float64 `json:"outDP"`
+		OutVis  [][]float64 `json:"outVis"`
 		OutDist float64     `json:"outDist"`
 	}
-	for _, v := range out {
-		X.Out = append(X.Out, []float64{v.Lon, v.Lat})
+	for _, v := range outDP {
+		X.OutDP = append(X.OutDP, []float64{v.Lon, v.Lat})
+	}
+	for _, v := range outVis {
+		X.OutVis = append(X.OutVis, []float64{v.Lon, v.Lat})
 	}
 	for _, v := range in.Data {
 		X.In = append(X.In, []float64{v.Lon, v.Lat})
 	}
-	X.OutDist = GetTotalTrackLength(out)
+	X.OutDist = GetTotalTrackLength(outDP)
 	json.Marshal(X)
 	t.Execute(w, X)
 }
