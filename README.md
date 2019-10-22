@@ -4,6 +4,10 @@ Go implementation of line simplification algorithms, with results plotted using 
 
 This work is specifically for simplification of GPS track plots, in the example case for FAI/IGC Flight Recorder Data Format files (e.g. for paragliding, sailplane flying etc).
 
+## Example Plot
+
+![Example Plot](static/example-plot.png "Example Plot")
+
 ## Algorithms
 
 * Douglas-Peucker
