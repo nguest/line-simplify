@@ -5,7 +5,7 @@ import (
 )
 
 // GetTotalTrackLength is the sum of the length of all track segments
-func GetTotalTrackLength(data []Datum) float64 {
+func GetTotalTrackLength(data []*Datum) float64 {
 	totalLen := 0.0
 	for i := 0; i < len(data)-1; i++ {
 		segmentLen := haversine(data[i], data[i+1])
@@ -19,7 +19,7 @@ func degToRad(deg float64) float64 {
 }
 
 // haversine computes the distance between two points in km taking into account the curve of the earth
-func haversine(p1, p2 Datum) float64 {
+func haversine(p1, p2 *Datum) float64 {
 	R := 6371.0 // km
 	φ1 := degToRad(p1.Lat)
 	φ2 := degToRad(p2.Lat)

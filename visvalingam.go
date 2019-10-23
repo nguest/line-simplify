@@ -13,7 +13,7 @@ type Item struct {
 }
 
 // Visvalingam line simplification algorithm - data (points), count (desired point count)
-func Visvalingam(data []Datum, count int) []Datum {
+func Visvalingam(data []*Datum, count int) []*Datum {
 	removed := 0
 
 	// build initial heap
@@ -176,7 +176,7 @@ func (h minHeap) down(i int) {
 }
 
 // returns double the triangle area
-func area(data []Datum, i0, i1, i2 int) float64 {
+func area(data []*Datum, i0, i1, i2 int) float64 {
 	v0 := data[i0]
 	v1 := data[i1]
 	v2 := data[i2]

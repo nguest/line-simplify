@@ -7,31 +7,31 @@ import (
 
 func TestGetTotalTrackLength(t *testing.T) {
 	//t.Run
-	data0 := []Datum{}
-	data1 := []Datum{
-		Datum{
+	data0 := []*Datum{}
+	data1 := []*Datum{
+		&Datum{
 			Lat: 21.0,
 			Lon: 10.0,
 		},
-		Datum{
+		&Datum{
 			Lat: 18.0,
 			Lon: 12.0,
 		},
-		Datum{
+		&Datum{
 			Lat: 22.0,
 			Lon: 11.0,
 		},
 	}
-	data2 := []Datum{
-		Datum{
+	data2 := []*Datum{
+		&Datum{
 			Lat: -21.0,
 			Lon: -10.0,
 		},
-		Datum{
+		&Datum{
 			Lat: -18.0,
 			Lon: -12.0,
 		},
-		Datum{
+		&Datum{
 			Lat: -22.0,
 			Lon: -11.0,
 		},
@@ -41,7 +41,7 @@ func TestGetTotalTrackLength(t *testing.T) {
 	t.Run("negative points", testFuncGetTotalTrackLength(data2, 850.8496136907015))
 }
 
-func testFuncGetTotalTrackLength(data []Datum, want float64) func(*testing.T) {
+func testFuncGetTotalTrackLength(data []*Datum, want float64) func(*testing.T) {
 	return func(t *testing.T) {
 		got := GetTotalTrackLength(data)
 		if got != want {
@@ -50,11 +50,3 @@ func testFuncGetTotalTrackLength(data []Datum, want float64) func(*testing.T) {
 		}
 	}
 }
-
-// func testSumFunc(numbers []int, expected int) func(*testing.T) {
-// 	return func(t *testing.T) {
-// 		actual := Sum(numbers)
-// 		if actual != expected {
-// 			t.Error(fmt.Sprintf("Expected the sum of %v to be %d but instead got %d!", numbers, expected, actual))
-// 		}
-// 	}
