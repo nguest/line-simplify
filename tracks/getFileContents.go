@@ -1,4 +1,4 @@
-package main
+package tracks
 
 import (
 	"bufio"
@@ -6,6 +6,13 @@ import (
 	"os"
 	"time"
 )
+
+type Datum struct {
+	Lat float64   `json:"lat"`
+	Lon float64   `json:"lon"`
+	Alt float64   `json:"alt"`
+	Ts  time.Time `json:"ts"`
+}
 
 // TrackData is a basic structure of all the data saved for a track.
 type TrackData struct {

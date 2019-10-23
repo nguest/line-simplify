@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"line-simplify/algorithms"
+	"line-simplify/tracks"
 	"log"
 	"net/http"
 
@@ -15,12 +17,12 @@ func index(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	in, err := ReadAndParse("sampleTracks/sample1.igc")
+	in, err := tracks.ReadAndParse("sampleTracks/sample1.igc")
 
 	pCount := 5
 
-	outDP := DPByCount(in.Data, pCount)
-	outVis := Visvalingam(in.Data, pCount)
+	outDP := algorithms.DPByCount(in.Data, pCount)
+	outVis := algorithms.Visvalingam(in.Data, pCount)
 
 	type L struct {
 		Line  [][]float64 `json:"line"`
@@ -38,19 +40,19 @@ func index(w http.ResponseWriter, r *http.Request) {
 		X.OutDP.Line = append(X.OutDP.Line, []float64{v.Lon, v.Lat})
 	}
 	X.OutDP.Title = "Douglas-Peucker"
-	X.OutDP.Dist = GetTotalTrackLength(outDP)
+	X.OutDP.Dist = tracks.GetTotalTrackLength(outDP)
 
 	for _, v := range outVis {
 		X.OutVis.Line = append(X.OutVis.Line, []float64{v.Lon, v.Lat})
 	}
 	X.OutVis.Title = "Visvalingam"
-	X.OutVis.Dist = GetTotalTrackLength(outVis)
+	X.OutVis.Dist = tracks.GetTotalTrackLength(outVis)
 
 	for _, v := range in.Data {
 		X.In.Line = append(X.In.Line, []float64{v.Lon, v.Lat})
 	}
 	X.In.Title = "Data In"
-	X.In.Dist = GetTotalTrackLength(in.Data)
+	X.In.Dist = tracks.GetTotalTrackLength(in.Data)
 
 	json.Marshal(X)
 	t.Execute(w, X)

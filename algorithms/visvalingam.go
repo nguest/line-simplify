@@ -1,9 +1,12 @@
-package main
+package algorithms
 
 import (
+	"line-simplify/tracks"
 	"math"
+	"time"
 )
 
+// Item describes items for visvalingam algorithm
 type Item struct {
 	a    float64 // triangle area * 2 (save one unnecessary multiplication)
 	pIdx int     // index of point in original path
@@ -13,7 +16,8 @@ type Item struct {
 }
 
 // Visvalingam line simplification algorithm - data (points), count (desired point count)
-func Visvalingam(data []*Datum, count int) []*Datum {
+func Visvalingam(data []*tracks.Datum, count int) []*tracks.Datum {
+	defer timeTrack(time.Now(), "Visvalingam")
 	removed := 0
 
 	// build initial heap
@@ -175,8 +179,8 @@ func (h minHeap) down(i int) {
 	}
 }
 
-// returns double the triangle area
-func area(data []*Datum, i0, i1, i2 int) float64 {
+// area returns double the triangle area
+func area(data []*tracks.Datum, i0, i1, i2 int) float64 {
 	v0 := data[i0]
 	v1 := data[i1]
 	v2 := data[i2]
