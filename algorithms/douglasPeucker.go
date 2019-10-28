@@ -9,25 +9,25 @@ import (
 
 // Line describes a line between two vectors
 type Line struct {
-	V1 *tracks.Datum
-	V2 *tracks.Datum
+	V1 tracks.Datum
+	V2 tracks.Datum
 }
 
 // Diff returns the difference of v1 and v2
-func Diff(v1, v2 *tracks.Datum) *tracks.Datum {
+func Diff(v1, v2 tracks.Datum) tracks.Datum {
 	var vR tracks.Datum
 	vR.Lon = v2.Lon - v1.Lon
 	vR.Lat = v2.Lat - v1.Lat
-	return &vR
+	return vR
 }
 
 // Abs returns the length between v1 and v2
-func Abs(v1, v2 *tracks.Datum) float64 {
+func Abs(v1, v2 tracks.Datum) float64 {
 	return math.Sqrt(math.Pow(Diff(v1, v2).Lon, 2) + math.Pow(Diff(v1, v2).Lat, 2))
 }
 
 // PerpendicularDistance retuns shortest distance between v and line
-func PerpendicularDistance(v *tracks.Datum, line *Line) float64 {
+func PerpendicularDistance(v tracks.Datum, line Line) float64 {
 	if v == line.V1 || v == line.V2 || line.V1 == line.V2 {
 		return 0.0
 	}
@@ -40,7 +40,7 @@ func PerpendicularDistance(v *tracks.Datum, line *Line) float64 {
 }
 
 // DPByTolerance : simple Douglas-Peucker algorithm with tolerance e
-func DPByTolerance(data []*tracks.Datum, e float64) []*tracks.Datum {
+func DPByTolerance(data []tracks.Datum, e float64) []tracks.Datum {
 	defer timeTrack(time.Now(), "DPByTolerance")
 
 	// Find the point with the maximum distance
@@ -49,7 +49,7 @@ func DPByTolerance(data []*tracks.Datum, e float64) []*tracks.Datum {
 	end := len(data) - 1
 
 	for i := 0; i <= end; i++ {
-		line := &Line{
+		line := Line{
 			V1: data[0],
 			V2: data[end],
 		}
@@ -61,7 +61,7 @@ func DPByTolerance(data []*tracks.Datum, e float64) []*tracks.Datum {
 		}
 	}
 
-	var Res []*tracks.Datum
+	var Res []tracks.Datum
 
 	if dMax > e && idx > 1 {
 		// Recursive call
@@ -71,7 +71,7 @@ func DPByTolerance(data []*tracks.Datum, e float64) []*tracks.Datum {
 		Res = append(recR1[0:len(recR1)-1], recR2[0:len(recR2)]...)
 	} else {
 		if len(data) > 1 {
-			Res = []*tracks.Datum{data[0], data[end-1]}
+			Res = []tracks.Datum{data[0], data[end-1]}
 		} else {
 			Res = data
 		}
@@ -80,7 +80,7 @@ func DPByTolerance(data []*tracks.Datum, e float64) []*tracks.Datum {
 }
 
 // DPByCount implements Douglas Peucker but with  a given pointscount for the result set
-func DPByCount(data []*tracks.Datum, count int) []*tracks.Datum {
+func DPByCount(data []tracks.Datum, count int) []tracks.Datum {
 	defer timeTrack(time.Now(), "DPByCount")
 
 	len := len(data)
@@ -92,7 +92,7 @@ func DPByCount(data []*tracks.Datum, count int) []*tracks.Datum {
 			return
 		}
 
-		line := &Line{
+		line := Line{
 			V1: data[start],
 			V2: data[end],
 		}
@@ -130,7 +130,7 @@ func DPByCount(data []*tracks.Datum, count int) []*tracks.Datum {
 
 	// filter correct highest-weighted points into []dataOut
 	n := 0
-	dataOut := make([]*tracks.Datum, count)
+	dataOut := make([]tracks.Datum, count)
 	for i, x := range data {
 		if weights[i] >= maxT {
 			dataOut[n] = x

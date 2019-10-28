@@ -23,6 +23,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 
 	outDP := algorithms.DPByCount(in.Data, pCount)
 	outVis := algorithms.Visvalingam(in.Data, pCount)
+	algorithms.Optimize(in.Data)
 
 	type L struct {
 		Line  [][]float64 `json:"line"`

@@ -16,7 +16,7 @@ type Datum struct {
 
 // TrackData is a basic structure of all the data saved for a track.
 type TrackData struct {
-	Data             []*Datum  `json:"data"`
+	Data             []Datum   `json:"data"`
 	ID               string    `json:"id"`
 	ElapsedTime      int       `json:"elapsedTime"`
 	IsComplete       bool      `json:"isComplete"`
@@ -50,7 +50,7 @@ func ReadAndParse(filepath string) (TrackData, error) {
 
 // parseIgc takes an array of linestrings and converts to trackData object.
 func parseIGC(lines []string) (TrackData, error) {
-	var data []*Datum
+	var data []Datum
 	var trackData TrackData
 	var rawDate string
 
@@ -90,7 +90,7 @@ func parseIGC(lines []string) (TrackData, error) {
 			longitude := lonMultiplier * (lonDeg + (lonMin*1000+lonFrac)/1000/60)
 			latitude := latMultiplier * (latDeg + (latMin*1000+latFrac)/1000/60)
 
-			dataItem := &Datum{
+			dataItem := Datum{
 				Lat: latitude,
 				Lon: longitude,
 				Alt: gpsAlt,
