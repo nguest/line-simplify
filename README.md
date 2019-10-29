@@ -9,7 +9,7 @@ Currently all distances between points for the algorithms are on a straight-line
 ## Example Plot
 
 A tracklog from a cross-country paragliding flight in Colombia provides the input dataset.
-Total lengths of tracklogs for the original info and for the results of each simplification algorithm are shown.
+Total lengths of tracklogs for the original info and for the results of each simplification algorithm are shown. The classic 3 turnpoint calculation is shown.
 
 ![Example Plot](static/example-plot.png "Example Plot")
 
@@ -17,6 +17,7 @@ Total lengths of tracklogs for the original info and for the results of each sim
 
 * Douglas-Peucker
 * Visvalingam
+* "Brute Force" OLC method
 
 ### Douglas-Peucker
 
@@ -31,3 +32,7 @@ This algorithm performs a line simplification that produces less angular results
 The principle of the algorithm is to select the vertices to delete (the less characteristic ones) rather than choosing the vertices to keep (in the Douglas and Peucker algorithm). To select the vertices to delete, there is an iterative process, and at each iteration, the triangles formed by three consecutive vertices are computed. If the area of the smallest triangle is smaller than a threshold (“area_tolerance” parameter), the middle vertex is deleted, and another iteration starts.
 
 More [Visvalingam](https://ignf.github.io/CartAGen/docs/algorithms/line/visvalingam.html) info
+
+### "Brute Force" OLC method
+
+This is the original code from 2002 which is used for Leonardo track optimizations. It calculates every possible distance permutation from all points in a tracklog and then determines the optimal longest path with 3 turnpoints. It is slow even for <1000 points but calculation times can run into the minutes with larger tracklogs, due to its O(n^2) complexity.
