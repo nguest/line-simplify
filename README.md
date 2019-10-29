@@ -11,7 +11,7 @@ Currently all distances between points for the algorithms are on a straight-line
 A tracklog from a cross-country paragliding flight in Colombia provides the input dataset.
 Total lengths of tracklogs for the original info and for the results of each simplification algorithm are shown. The classic 3 turnpoint calculation is shown.
 
-![Example Plot](static/example-plot.png "Example Plot")
+![Example Plot](static/example-plot2.png "Example Plot")
 
 ## Algorithms
 
