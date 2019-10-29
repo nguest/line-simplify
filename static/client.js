@@ -15,33 +15,52 @@ const colors = [
     "green",
     "blue",
     "purple"
-]
+];
+
+const sets = [
+    {
+        title: "in",
+        data: data.in.line,
+        circles: false,
+        color: colors[0]
+    },
+    {
+        title: "douglas-peucker",
+        data: data.outDP.line,
+        circles: true,
+        color: colors[1]
+    },
+    {
+        title: "visvalingam",
+        data: data.outVis.line,
+        circles: true,
+        color: colors[2]
+    },
+    {
+        title: "brute-force",
+        data: data.outBrute.line,
+        circles: true,
+        color: colors[3]
+    }
+];
+
+const lines = {}
 
 // Scales
 const xScale = d3.scaleLinear()
-    .domain([d3.min(datasetIn, (d) => d[0]), d3.max(datasetIn, (d) => d[0])])
+    .domain([d3.min(sets[0].data, (d) => d[0]), d3.max(sets[0].data, (d) => d[0])])
     .range([0, width]);
 
 const yScale = d3.scaleLinear()
-    .domain([d3.min(datasetIn, (d) => d[1]), d3.max(datasetIn, (d) => d[1])])
+    .domain([d3.min(sets[0].data, (d) => d[1]), d3.max(sets[0].data, (d) => d[1])])
     .range([height, 0]); 
 
 // Line generator
-const inLine = d3.line()
+sets.forEach(set => (
+    lines[set] = d3.line()
     .x((d, i) => xScale(d[0])) 
     .y((d) => yScale(d[1]))
-
-const outLineDP = d3.line()
-    .x((d, i) => xScale(d[0]))
-    .y((d) => yScale(d[1]))
-
-const outLineVis = d3.line()
-    .x((d, i) => xScale(d[0]))
-    .y((d) => yScale(d[1]))
-
-const outLineBrute = d3.line()
-    .x((d, i) => xScale(d[0]))
-    .y((d) => yScale(d[1]))
+))
 
 // Add SVG to page
 const svg = d3.select("body").append("svg")
@@ -61,62 +80,31 @@ svg.append("g")
     .attr("class", "y axis")
     .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
 
-// Append path, bind data, call line generator 
-svg.append("path")
-    .datum(datasetIn)
-    .attr("fill", "none")
-    .attr("stroke", colors[0])
-    .attr("d", inLine);
-
-svg.append("path")
-    .datum(datasetDP)
-    .attr("fill", "none")
-    .attr("stroke", colors[1])
-    .attr("d", outLineDP);
-
-svg.append("path")
-    .datum(datasetVis)
-    .attr("fill", "none")
-    .attr("stroke", colors[2])
-    .attr("d", outLineVis);
-
-svg.append("path")
-    .datum(datasetBrute)
-    .attr("fill", "none")
-    .attr("stroke", colors[3])
-    //.attr("stroke-width", 4)
-    .attr("d", outLineBrute);
-
-
-// Append a circle for each datapoint
-svg.selectAll(".dotDP")
-    .data(datasetDP)
-    .enter().append("circle") // Uses the enter().append() method
-    .attr("class", "dotDP") // Assign a class for styling
-    .attr("cx", (d, i) =>  (xScale(d[0])))
-    .attr("cy", (d) => (yScale(d[1])))
-    .attr("r", 10)
-    .attr("fill", "none")
-    .attr("strokeWidth", "1")
-    .attr("stroke", colors[1])
-    .on("mouseover", (a, b, c) => { 
-  	    console.log(a) 
-        //this.attr('class', 'focus')
-    });
-
-svg.selectAll(".dotVis")
-    .data(datasetVis)
-    .enter().append("circle") // Uses the enter().append() method
-    .attr("class", "dotVis") // Assign a class for styling
-    .attr("cx", (d, i) =>  (xScale(d[0])))
-    .attr("cy", (d) => (yScale(d[1])))
-    .attr("r", 10)
-    .attr("fill", "none")
-    .attr("strokeWidth", "1")
-    .attr("stroke", colors[2])
-    .on("mouseover", (a, b, c) => { 
-  	    console.log(a) 
-    });
+// Append path, bind data, call line generator
+sets.forEach(set => {
+    svg.append("path")
+        .datum(set.data)
+        .attr("fill", "none")
+        .attr("stroke", set.color)
+        .attr("d", lines[set])
+    // Append a circle for each datapoint
+    if (set.title !== 'in') {
+        svg.selectAll(`.dot-${set.title}`)
+        .data(set.data)
+        .enter().append("circle") // Uses the enter().append() method
+        .attr("class", "dotDP") // Assign a class for styling
+        .attr("cx", (d, i) =>  (xScale(d[0])))
+        .attr("cy", (d) => (yScale(d[1])))
+        .attr("r", 10)
+        .attr("fill", "none")
+        .attr("strokeWidth", "1")
+        .attr("stroke", set.color)
+        .on("mouseover", (a, b, c) => { 
+            console.log(a) 
+            //this.attr('class', 'focus')
+        });
+    }
+})
 
 // append some legends
 const addLegends = () => {

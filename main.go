@@ -17,7 +17,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	in, err := tracks.ReadAndParse("sampleTracks/sample2.igc")
+	in, err := tracks.ReadAndParse("sampleTracks/sample1.igc")
 
 	pCount := 5
 
