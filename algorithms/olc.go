@@ -4,17 +4,16 @@ import (
 	"fmt"
 	"line-simplify/tracks"
 	"math"
+	"time"
 )
 
-func Optimize(data []tracks.Datum) {
+func LeonardoOptimize(data []tracks.Datum) []tracks.Datum {
+	defer timeTrack(time.Now(), "LeonardoOptimize")
 	pnts := len(data)
 	distance, maxDist, max2Dist := initDmVal(data)
 
 	dMin, dMinI, dMinJ := initDMin(pnts, distance, maxDist)
 	maxenddist, maxendpunkt, leaveout := initMaxEnd(pnts, distance, max2Dist)
-
-	//var max2dist int // TODO get this from above fns
-	//var distance []int // TODO get this from above fns
 
 	var max1, max2, max3, max4, max5, maxroute, bestfai, bestflach int
 	var i1leaveout, fsleaveout, dreieckleaveout, flachleaveout, faileaveout int
@@ -114,7 +113,7 @@ func Optimize(data []tracks.Datum) {
 		}
 	}
 
-	fmt.Println("calculating best waypoints.. for more than 500 points need some minutes, press Ctrl-C for intermediate results..\n")
+	fmt.Println("calculating best waypoints.. for more than 500 points need some minutes, press Ctrl-C for intermediate results...")
 
 	for i2 := 0; i2 < i2cmp; i2++ { /* 1.Wende */ /* i1leaveout = 1; kann wech */
 		e := 0
@@ -208,7 +207,6 @@ func Optimize(data []tracks.Datum) {
 				mrme = tmp - e
 			}
 			/* leaveout = 1;*/
-			/* if (( */
 			fsleaveout = (mrmemf-maxaplusb)/max2d2 + 1 /* )>1) { */
 			dreieckleaveout = (d5minusc - maxaplusb) / max2d7
 			flachleaveout = (bflpdmc-maxaplusb)/max2d3 + 1
@@ -219,7 +217,6 @@ func Optimize(data []tracks.Datum) {
 			if leaveout < 1 {
 				leaveout = 1
 			}
-			/* } */
 		}
 	}
 	//printbest(max1, max2, max3, max4, max5, maxroute, bestfai, bestflach, pnts, distance)
@@ -233,83 +230,90 @@ func Optimize(data []tracks.Datum) {
 	FAITrianglePoints := FAITriangleKm * 2.0
 
 	if freeFlightPoints > freeTrianglePoints && freeFlightPoints > FAITrianglePoints {
-		fmt.Println("OUT BEST_FLIGHT_TYPE FREE_FLIGHT\n")
+		fmt.Println("OUT BEST_FLIGHT_TYPE FREE_FLIGHT")
 	} else if freeTrianglePoints > FAITrianglePoints {
 		/*
-		 *	Die Dreiecke bestehen aus den Schenkeln a, b und c. Von dieser Strecke
+		 * Die Dreiecke bestehen aus den Schenkeln a, b und c. Von dieser Strecke
 		 * wird die Distanz d zwischen Start- und Endpunkt abgezogen
 		 */
-		fmt.Println("OUT BEST_FLIGHT_TYPE FREE_TRIANGLE\n")
+		fmt.Println("OUT BEST_FLIGHT_TYPE FREE_TRIANGLE")
 	} else {
-		fmt.Println("OUT BEST_FLIGHT_TYPE FAI_TRIANGLE\n")
+		fmt.Println("OUT BEST_FLIGHT_TYPE FAI_TRIANGLE")
 	}
 
 	/* Print all opti results          */
+	fmt.Println("OUT TYPE FREE_FLIGHT")
+	fmt.Printf("OUT FLIGHT_KM %f\n", freeFlightKm)
+	fmt.Printf("OUT FLIGHT_POINTS %f\n", freeFlightPoints)
 
-	fmt.Println("OUT TYPE FREE_FLIGHT\n")
-	fmt.Sprintf("OUT FLIGHT_KM %f\n", freeFlightKm)
-	fmt.Sprintf("OUT FLIGHT_POINTS %f\n", freeFlightPoints)
-
-	fmt.Sprintf("DEBUG Best free Flight: %f km = %f Points\n", freeFlightKm, freeFlightPoints)
+	fmt.Printf("DEBUG Best free Flight: %f km = %f Points\n", freeFlightKm, freeFlightPoints)
 	fmt.Println("OUT ")
 	printpoint(max1)
 	fmt.Printf("\n")
-	fmt.Println("OUT ")
+	fmt.Printf("OUT ")
 	printpoint(max2)
-	fmt.Printf(" %f km\n", distance[max1+pnts*max2]/1000.0)
-	fmt.Println("OUT ")
+	fmt.Printf(" %f km\n", float64(distance[max1+pnts*max2])/1000.0)
+	fmt.Printf("OUT ")
 	printpoint(max3)
-	fmt.Printf(" %f km\n", distance[max2+pnts*max3]/1000.0)
+	fmt.Printf(" %f km\n", float64(distance[max2+pnts*max3])/1000.0)
 	fmt.Printf("OUT ")
 	printpoint(max4)
-	fmt.Printf(" %f km\n", distance[max3+pnts*max4]/1000.0)
+	fmt.Printf(" %f km\n", float64(distance[max3+pnts*max4])/1000.0)
 	fmt.Printf("OUT ")
 	printpoint(max5)
-	fmt.Printf(" %f km\n", distance[max4+pnts*max5]/1000.0)
+	fmt.Printf(" %f km\n", float64(distance[max4+pnts*max5])/1000.0)
 
 	fmt.Printf("OUT TYPE FREE_TRIANGLE\n")
 	fmt.Printf("OUT FLIGHT_KM %f\n", freeTriangleKm)
 	fmt.Printf("OUT FLIGHT_POINTS %f\n", freeTrianglePoints)
 
-	fmt.Printf("DEBUG Best free Triangle: %f km = %f Points\n", bestflach/1000.0, float64(bestflach)/1000.0*1.75)
+	fmt.Printf("DEBUG Best free Triangle: %f km = %f Points\n", float64(bestflach)/1000.0, float64(bestflach)/1000.0*1.75)
 	fmt.Printf("OUT ")
 
 	printpoint(max1flach)
 	fmt.Printf("\n")
 	fmt.Printf("OUT ")
 	printpoint(max2flach)
-	fmt.Printf(" %3.3lf km=d\n", distance[max1flach+pnts*max5flach]/1000.0)
+	fmt.Printf(" %f km=d\n", float64(distance[max1flach+pnts*max5flach])/1000.0)
 	fmt.Printf("OUT ")
 	printpoint(max3flach)
-	fmt.Printf(" %3.3lf km=a\n", distance[max2flach+pnts*max3flach]/1000.0)
+	fmt.Printf(" %f km=a\n", float64(distance[max2flach+pnts*max3flach])/1000.0)
 	fmt.Printf("OUT ")
 	printpoint(max4flach)
-	fmt.Printf(" %3.3lf km=b\n", distance[max3flach+pnts*max4flach]/1000.0)
+	fmt.Printf(" %f km=b\n", float64(distance[max3flach+pnts*max4flach])/1000.0)
 	fmt.Printf("OUT ")
 	printpoint(max5flach)
-	fmt.Printf(" %3.3lf km=c\n", distance[max2flach+pnts*max4flach]/1000.0)
+	fmt.Printf(" %f km=c\n", float64(distance[max2flach+pnts*max4flach])/1000.0)
 
 	fmt.Printf("OUT TYPE FAI_TRIANGLE\n")
 	fmt.Printf("OUT FLIGHT_KM %f\n", FAITriangleKm)
 	fmt.Printf("OUT FLIGHT_POINTS %f\n", FAITrianglePoints)
 
-	fmt.Printf("bestes FAI Dreieck: %f km = %f Punkte\n", bestfai/1000.0, bestfai/1000.0*2.0)
+	fmt.Printf("bestes FAI Dreieck: %f km = %f Punkte\n", float64(bestfai)/1000.0, float64(bestfai)/1000.0*2.0)
 	fmt.Printf("OUT ")
 	printpoint(max1fai)
 	fmt.Printf("\n")
 	fmt.Printf("OUT ")
 	printpoint(max2fai)
-	fmt.Printf(" %f km=d\n", distance[max1fai+pnts*max5fai]/1000.0)
+	fmt.Printf(" %f km=d\n", float64(distance[max1fai+pnts*max5fai])/1000.0)
 	fmt.Printf("OUT ")
 	printpoint(max3fai)
-	fmt.Printf(" %f km=a\n", distance[max2fai+pnts*max3fai]/1000.0)
+	fmt.Printf(" %f km=a\n", float64(distance[max2fai+pnts*max3fai])/1000.0)
 	fmt.Printf("OUT ")
 	printpoint(max4fai)
-	fmt.Printf(" %f km=b\n", distance[max3fai+pnts*max4fai]/1000.0)
+	fmt.Printf(" %f km=b\n", float64(distance[max3fai+pnts*max4fai])/1000.0)
 	fmt.Printf("OUT ")
 	printpoint(max5fai)
-	fmt.Printf(" %f km=c\n", distance[max2fai+pnts*max4fai]/1000.0)
+	fmt.Printf(" %f km=c\n", float64(distance[max2fai+pnts*max4fai])/1000.0)
 
+	freeFlight := []tracks.Datum{
+		data[max1],
+		data[max2],
+		data[max3],
+		data[max4],
+		data[max5],
+	}
+	return freeFlight
 }
 
 type PointList struct {
@@ -319,6 +323,7 @@ type PointList struct {
 
 // initialize distance matrix values
 func initDmVal(data []tracks.Datum) ([]int, int, int) {
+	fmt.Println("Initializing distance matrix values...")
 	dFak := 6371000.0
 	piDiv180 := math.Pi / 180.0
 	pnts := len(data)
@@ -329,7 +334,6 @@ func initDmVal(data []tracks.Datum) ([]int, int, int) {
 	latRad := make([]float64, pnts)
 	sinLat := make([]float64, pnts)
 	cosLat := make([]float64, pnts)
-	//var pointList []PointList
 	distance := make([]int, pnts*pnts)
 
 	// build the weird pointList
@@ -402,10 +406,11 @@ func initDmVal(data []tracks.Datum) ([]int, int, int) {
 
 	fmt.Printf("DEBUG maximal distance between any 2 points: %d meters\n", maxDist)
 	fmt.Printf("OUT MAX_LINEAR_DISTANCE %d\n", maxDist)
+	fmt.Printf("TOTAL TRACKLOG POINTS %d\n", pnts)
 	fmt.Printf("DEBUG P1: %d\n", maxp1)
 	fmt.Printf("DEBUG P2: %d\n", maxp2)
 
-	fmt.Printf("OUT TYPE FreeFlight0TP\n")
+	fmt.Printf("OUT TYPE FreeFlight0TP\n==============================\n")
 	fmt.Printf("OUT FLIGHT_KM %f\n", float64(maxDist)/1000.0)
 	fmt.Printf("OUT FLIGHT_POINTS %f\n", float64(maxDist)/1000.0)
 	fmt.Printf("OUT ")
@@ -415,7 +420,7 @@ func initDmVal(data []tracks.Datum) ([]int, int, int) {
 	printpoint(maxp2)
 	fmt.Printf(" %f km\n", float64(distance[maxp1+pnts*maxp2])/1000.0)
 
-	fmt.Printf("OUT TYPE MaxTakeoffDistance\n")
+	fmt.Printf("OUT TYPE MaxTakeoffDistance\n==============================\n")
 	fmt.Printf("OUT FLIGHT_KM %f\n", float64(maxTDist)/1000.0)
 	fmt.Printf("OUT FLIGHT_POINTS %f\n", float64(maxTDist)/1000.0)
 	fmt.Printf("OUT ")
@@ -452,7 +457,7 @@ func initDMin(pnts int, distance []int, maxDist int) ([][]int, [][]int, [][]int)
 
 	var i, j, d, mini, minj int
 	minimum := maxDist
-	fmt.Println("initializing dmin(i,j) with best start/endpoints for triangles..\n")
+	fmt.Println("initializing dmin(i,j) with best start/endpoints for triangles...")
 
 	for j = pnts - 1; j > 0; j-- { /* erste Zeile separat behandeln: treat first line separately */
 		d := distance[0+pnts*j]
@@ -515,7 +520,7 @@ func initMaxEnd(pnts int, distance []int, max2Dist int) ([]int, []int, int) {
 	maxendpunkt := make([]int, pnts)
 
 	var w3, i, f, maxf, besti, leaveout int
-	fmt.Println("initializing maxenddist[] with maximal distance to best endpoint ..\n")
+	fmt.Println("initializing maxenddist[] with maximal distance to best endpoint ...")
 
 	for w3 = pnts - 1; w3 > 1; w3-- {
 		maxf = 0

@@ -96,7 +96,7 @@ func parseIGC(lines []string) (TrackData, error) {
 				Alt: gpsAlt,
 				Ts:  getTimeStamp(rawDate, rawTimeOfDay),
 			}
-			data = append(data, dataItem)
+			data = filterPoints(data, dataItem)
 		}
 	}
 
@@ -105,6 +105,21 @@ func parseIGC(lines []string) (TrackData, error) {
 	trackData.Date = data[0].Ts
 
 	return trackData, nil
+}
+
+// filterPoints : filter out zero points and crazy slow/fast
+func filterPoints(data []Datum, dataItem Datum) []Datum {
+	if len(data) == 0 {
+		data = append(data, dataItem)
+	} else {
+		d := haversine(data[len(data)-1], dataItem)
+		t := dataItem.Ts.Sub(data[len(data)-1].Ts)
+		v := d / float64(t/3600) * 1000000000
+		if d > 0.0 && v < 90.0 && v > 0.1 {
+			data = append(data, dataItem)
+		}
+	}
+	return data
 }
 
 func getTimeStamp(rawDate string, rawTimeOfDay string) time.Time {

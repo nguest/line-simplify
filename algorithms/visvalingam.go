@@ -19,9 +19,10 @@ type Item struct {
 func Visvalingam(data []tracks.Datum, count int) []tracks.Datum {
 	defer timeTrack(time.Now(), "Visvalingam")
 	removed := 0
-
+	// clone data to avoid mutation of original dataset
+	dataC := append([]tracks.Datum(nil), data...)
 	// build initial heap
-	heap := minHeap(make([]*Item, 0, len(data)))
+	heap := minHeap(make([]*Item, 0, len(dataC)))
 
 	listStart := &Item{
 		a:    math.Inf(1),
@@ -30,12 +31,12 @@ func Visvalingam(data []tracks.Datum, count int) []tracks.Datum {
 	heap.Push(listStart)
 
 	// make path Items, exclude start and end
-	items := make([]Item, len(data))
+	items := make([]Item, len(dataC))
 
 	prev := listStart
-	for i := 1; i < len(data)-1; i++ {
+	for i := 1; i < len(dataC)-1; i++ {
 		item := &items[i]
-		item.a = area(data, i-1, i, i+1)
+		item.a = area(dataC, i-1, i, i+1)
 		item.pIdx = i
 		item.prev = prev
 
@@ -45,9 +46,9 @@ func Visvalingam(data []tracks.Datum, count int) []tracks.Datum {
 	}
 
 	// make final Item
-	lastItem := &items[len(data)-1]
+	lastItem := &items[len(dataC)-1]
 	lastItem.a = math.Inf(1)
-	lastItem.pIdx = len(data) - 1
+	lastItem.pIdx = len(dataC) - 1
 	lastItem.prev = prev
 	prev.next = lastItem
 	heap.Push(lastItem)
@@ -56,7 +57,7 @@ func Visvalingam(data []tracks.Datum, count int) []tracks.Datum {
 
 	for len(heap) > 0 {
 		curr := heap.Pop()
-		if len(data)-removed <= count {
+		if len(dataC)-removed <= count {
 			break
 		}
 		next := curr.next
@@ -69,13 +70,13 @@ func Visvalingam(data []tracks.Datum, count int) []tracks.Datum {
 
 		// calculate new areas
 		if prev.prev != nil {
-			a := area(data, prev.prev.pIdx, prev.pIdx, next.pIdx)
+			a := area(dataC, prev.prev.pIdx, prev.pIdx, next.pIdx)
 			a = math.Max(a, curr.a)
 			heap.Update(prev, a)
 		}
 
 		if next.next != nil {
-			a := area(data, prev.pIdx, next.pIdx, next.next.pIdx)
+			a := area(dataC, prev.pIdx, next.pIdx, next.next.pIdx)
 			a = math.Max(a, curr.a)
 			heap.Update(next, a)
 		}
@@ -85,11 +86,11 @@ func Visvalingam(data []tracks.Datum, count int) []tracks.Datum {
 
 	cnt := 0
 	for item != nil {
-		data[cnt] = data[item.pIdx]
+		dataC[cnt] = dataC[item.pIdx]
 		item = item.next
 		cnt++
 	}
-	return data[:cnt]
+	return dataC[:cnt]
 }
 
 // minheap logic

@@ -8,11 +8,13 @@ const height = window.innerHeight - margin.top - margin.bottom;
 const datasetIn = data.in.line;
 const datasetDP = data.outDP.line;
 const datasetVis = data.outVis.line;
+const datasetBrute = data.outBrute.line;
 
 const colors = [
     "red",
     "green",
-    "blue"
+    "blue",
+    "purple"
 ]
 
 // Scales
@@ -34,6 +36,10 @@ const outLineDP = d3.line()
     .y((d) => yScale(d[1]))
 
 const outLineVis = d3.line()
+    .x((d, i) => xScale(d[0]))
+    .y((d) => yScale(d[1]))
+
+const outLineBrute = d3.line()
     .x((d, i) => xScale(d[0]))
     .y((d) => yScale(d[1]))
 
@@ -73,6 +79,14 @@ svg.append("path")
     .attr("fill", "none")
     .attr("stroke", colors[2])
     .attr("d", outLineVis);
+
+svg.append("path")
+    .datum(datasetBrute)
+    .attr("fill", "none")
+    .attr("stroke", colors[3])
+    //.attr("stroke-width", 4)
+    .attr("d", outLineBrute);
+
 
 // Append a circle for each datapoint
 svg.selectAll(".dotDP")

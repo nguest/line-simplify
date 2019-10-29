@@ -17,13 +17,13 @@ func index(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	in, err := tracks.ReadAndParse("sampleTracks/sample1.igc")
+	in, err := tracks.ReadAndParse("sampleTracks/sample2.igc")
 
 	pCount := 5
 
 	outDP := algorithms.DPByCount(in.Data, pCount)
 	outVis := algorithms.Visvalingam(in.Data, pCount)
-	algorithms.Optimize(in.Data)
+	outBrute := algorithms.LeonardoOptimize(in.Data)
 
 	type L struct {
 		Line  [][]float64 `json:"line"`
@@ -32,9 +32,10 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var X struct {
-		In     L `json:"in"`
-		OutDP  L `json:"outDP"`
-		OutVis L `json:"outVis"`
+		In       L `json:"in"`
+		OutDP    L `json:"outDP"`
+		OutVis   L `json:"outVis"`
+		OutBrute L `json:"outBrute"`
 	}
 
 	for _, v := range outDP {
@@ -48,6 +49,12 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}
 	X.OutVis.Title = "Visvalingam"
 	X.OutVis.Dist = tracks.GetTotalTrackLength(outVis)
+
+	for _, v := range outBrute {
+		X.OutBrute.Line = append(X.OutBrute.Line, []float64{v.Lon, v.Lat})
+	}
+	X.OutBrute.Title = "Brute Force"
+	X.OutBrute.Dist = tracks.GetTotalTrackLength(outBrute)
 
 	for _, v := range in.Data {
 		X.In.Line = append(X.In.Line, []float64{v.Lon, v.Lat})
