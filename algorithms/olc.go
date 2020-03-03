@@ -10,14 +10,14 @@ import (
 func LeonardoOptimize(data []tracks.Datum) []tracks.Datum {
 	defer timeTrack(time.Now(), "LeonardoOptimize")
 	pnts := len(data)
-	distance, maxDist, max2Dist := initDmVal(data)
 
+	distance, maxDist, max2Dist := initDistMatrix(data)
 	dMin, dMinI, dMinJ := initDMin(pnts, distance, maxDist)
-	maxenddist, maxendpunkt, leaveout := initMaxEnd(pnts, distance, max2Dist)
+	maxEndDist, maxEndPoint, leaveout := initMaxEnd(pnts, distance, max2Dist)
 
-	var max1, max2, max3, max4, max5, maxroute, bestfai, bestflach int
-	var i1leaveout, fsleaveout, dreieckleaveout, flachleaveout, faileaveout int
-	var max1flach, max2flach, max3flach, max4flach, max5flach, bflpdmc int
+	var max1, max2, max3, max4, max5, maxroute, bestfai, bestFlat int
+	var i1leaveout, fsleaveout, triangleleaveout, flatLeaveout, faileaveout int
+	var max1Flat, max2Flat, max3Flat, max4Flat, max5Flat, bflpdmc int
 	var max1fai, max2fai, max3fai, max4fai, max5fai, baipdmc int
 
 	max2d2 := max2Dist * 2
@@ -25,95 +25,7 @@ func LeonardoOptimize(data []tracks.Datum) []tracks.Datum {
 	max2d3 := max2Dist * 3
 	i2cmp := pnts - 2
 
-	var firstGuess func()
-	firstGuess = func() {
-		pnts := len(data) // TODO
-		var distance []int
-		var a, b, c, d, u, tmp int
-		var bestfai, bestflach int
-		/* geratene L�sung f�r freie Strecke: */
-		/* max1 = 0;       /* Start ganz vorne */
-		/* max2 = pnts/4;  /* Erste Wende nach einem 4tel der Strecke */
-		/* max3 = pnts/2;  /* Zweite Wende etwa in der Mitte */
-		/* max4 = pnts*3/4;/* Dritte Wende etwa nach 3/4teln der Strecke */
-		/* max5 = pnts-1;  /* Endpunkt ganz hinten */
-
-		max1 := pnts * 3 / 8 /* Start ganz vorne */
-		max2 := pnts * 4 / 8 /* Erste Wende nach einem 4tel der Strecke */
-		max3 := pnts * 5 / 8 /* Zweite Wende etwa in der Mitte */
-		max4 := pnts * 6 / 8 /* Dritte Wende etwa nach 3/4teln der Strecke */
-		max5 := pnts - 1     /* Endpunkt ganz hinten */
-		maxroute = distance[max1+pnts*max2] + distance[max2+pnts*max3] + distance[max3+pnts*max4] + distance[max4+pnts*max5]
-
-		/* geratene L�sung f�r ein Dreieck begonnen auf einem Schenkel */
-		i1 := 0            /* Start ganz vorne */
-		i2 := pnts / 6     /* Erste Wende nach einem Sechstel */
-		i3 := pnts / 2     /* Zweite Wende in der Mitte */
-		i4 := pnts * 5 / 6 /* Dritte Wende */
-		i5 := pnts - 1     /* Endpunkt ganz hinten */
-		a = distance[i2+pnts*i3]
-		b = distance[i3+pnts*i4]
-		c = distance[i2+pnts*i4]
-		d = distance[i1+pnts*i5]
-
-		u = a + b + c
-
-		if d*5 <= u { /* zuf�llig ein Dreieck gefunden? */
-			tmp = u * 7
-			if (a*25 >= tmp) && (b*25 >= tmp) && (c*25 >= tmp) { /* zuf�llig FAI-D gefunden? */
-				bestfai = u - d
-				max1fai = i1
-				max2fai = i2
-				max3fai = i3
-				max4fai = i4
-				max5fai = i5
-			} else { /* Flaches Dreieck */
-				bestflach = u - d
-				max1flach = i1
-				max2flach = i2
-				max3flach = i3
-				max4flach = i4
-				max5flach = i5
-			}
-		}
-		firstGuess()
-
-		/* geratene L�sung f�r eine Dreieck begonnen an erster Wende */
-		i1 = 0
-		i2 = 0            /* Start und erste Wende ganz vorne */
-		i3 = pnts / 3     /* zweite Wende nach 1/3 der Strecke */
-		i4 = pnts * 2 / 3 /* dritte Wende nach 2/3 der Strecke */
-		i5 = pnts - 1     /* Endpunkt ganz hinten */
-		a = distance[i2+pnts*i3]
-		b = distance[i3+pnts*i4]
-		c = distance[i2+pnts*i4]
-		d = distance[i1+pnts*i5]
-		u = a + b + c
-		if d*5 <= u { /* zuf�llig ein Dreieck gefunden? */
-			tmp = u * 7
-			if (a*25 >= tmp) && (b*25 >= tmp) && (c*25 >= tmp) { /* zuf�llig FAI-D gefunden? */
-				if (u - d) > bestfai {
-					bestfai = u - d
-					max1fai = i1
-					max2fai = i2
-					max3fai = i3
-					max4fai = i4
-					max5fai = i5
-				}
-			} else { /* Flaches Dreieck */
-				if (u - d) > bestflach {
-					bestflach = u - d
-					max1flach = i1
-					max2flach = i2
-					max3flach = i3
-					max4flach = i4
-					max5flach = i5
-				}
-			}
-		}
-	}
-
-	fmt.Println("calculating best waypoints.. for more than 500 points need some minutes, press Ctrl-C for intermediate results...")
+	fmt.Println("calculating best waypoints... for more than 500 points need a few minutes...")
 
 	for i2 := 0; i2 < i2cmp; i2++ { /* 1.Wende */ /* i1leaveout = 1; kann wech */
 		e := 0
@@ -125,7 +37,6 @@ func LeonardoOptimize(data []tracks.Datum) []tracks.Datum {
 				i1 = i
 			}
 			i1leaveout = 1
-			/*  MANOLIS if ((i1leaveout=(e-tmp)/max2dist)<1) i1leaveout = 1; */
 		} /* e, i1 enthalten fuer dieses i2 den besten Wert  e, i1 contain the best value for this i2  */
 
 		mrme := maxroute - e
@@ -137,10 +48,10 @@ func LeonardoOptimize(data []tracks.Datum) []tracks.Datum {
 			d := fdMin(i2, i4, dMin)
 			d5minusc := d*5 - c
 			dmc := d - c
-			bflpdmc = bestflach + dmc
+			bflpdmc = bestFlat + dmc
 			baipdmc = bestfai + dmc
 			maxaplusb := 0 /* leaveout = 1;  eigentlich nicht notwendig */
-			f := maxend(i4, maxenddist)
+			f := maxend(i4, maxEndDist)
 			mrmemf := mrme - f
 			epf := e + f
 			i3 := i2 + 1
@@ -148,14 +59,14 @@ func LeonardoOptimize(data []tracks.Datum) []tracks.Datum {
 				a := distance[i2+pnts*i]
 				b := distance[i+pnts*i4]
 				aplusb := a + b
-				if aplusb > maxaplusb { /* findet gr��tes a+b (und auch gr��tes Dreieck) */
+				if aplusb > maxaplusb { /* findet gr��tes a+b (und auch gr��tes triangle) */
 					maxaplusb = aplusb
 					i3 = i
 				}
-				if d5minusc <= aplusb { /* Dreieck gefunden 5*d<= a+b+c */
+				if d5minusc <= aplusb { /* triangle gefunden 5*d<= a+b+c */
 					u := aplusb + c
 					tmp := u * 7
-					if c25 >= tmp && a*25 >= tmp && b*25 >= tmp { /* FAI-D gefunden */
+					if c25 >= tmp && a*25 >= tmp && b*25 >= tmp { /* FAI-D found */
 						w := u - d
 						if w > bestfai { /* besseres FAI-D gefunden */
 							max1fai = fdMinI(i2, i4, dMinI)
@@ -166,63 +77,57 @@ func LeonardoOptimize(data []tracks.Datum) []tracks.Datum {
 							bestfai = w
 							baipdmc = w + dmc
 						}
-					} else { /* nicht FAI=flaches Dreieck gefunden */
+					} else { /* no FAI=flat triangles found */
 						w := u - d
-						if w > bestflach {
-							max1flach = fdMinI(i2, i4, dMinI)
-							max2flach = i2
-							max3flach = i
-							max4flach = i4
-							max5flach = fdMinJ(i2, i4, dMinJ)
-							bestflach = w
-							bflpdmc = bestflach + dmc
+						if w > bestFlat {
+							max1Flat = fdMinI(i2, i4, dMinI)
+							max2Flat = i2
+							max3Flat = i
+							max4Flat = i4
+							max5Flat = fdMinJ(i2, i4, dMinJ)
+							bestFlat = w
+							bflpdmc = bestFlat + dmc
 						}
 					}
 				}
-				/* leaveout = 1; */
 				fsleaveout = (mrmemf-aplusb)/max2d2 + 1 /* +1 wg. > */
-				/* if (fsleaveout>1) { */
-				dreieckleaveout = (d5minusc - aplusb) / max2d2
-				flachleaveout = (bflpdmc-aplusb)/max2d2 + 1 /* +1 wg > */
-				faileaveout = (baipdmc-aplusb)/max2d2 + 1   /* +1 wg > */
-				leaveout = MIN(flachleaveout, faileaveout)
-				leaveout = MAX(leaveout, dreieckleaveout)
+				triangleleaveout = (d5minusc - aplusb) / max2d2
+				flatLeaveout = (bflpdmc-aplusb)/max2d2 + 1 /* +1 wg > */
+				faileaveout = (baipdmc-aplusb)/max2d2 + 1  /* +1 wg > */
+				leaveout = MIN(flatLeaveout, faileaveout)
+				leaveout = MAX(leaveout, triangleleaveout)
 				leaveout = MIN(leaveout, fsleaveout)
 				if leaveout < 1 {
 					leaveout = 1
 				}
-				/* MANOLIS */
 				leaveout = 1
-				/*}*/
-				/* printf("leaveouts: fs=%d dr=%d fl=%d fai=%d insgesamt=%d\n", fsleaveout,dreieckleaveout,flachleaveout,faileaveout,leaveout); */
 			} /* maxaplusb, i3 enthalten fuer dieses i2 und i4 besten Wert */
+
 			tmp := maxaplusb + epf
 			if tmp > maxroute {
 				max1 = i1
 				max2 = i2
 				max3 = i3
 				max4 = i4
-				max5 = maxendi(i4, maxendpunkt)
+				max5 = maxendi(i4, maxEndPoint)
 				maxroute = tmp
 				mrme = tmp - e
 			}
-			/* leaveout = 1;*/
 			fsleaveout = (mrmemf-maxaplusb)/max2d2 + 1 /* )>1) { */
-			dreieckleaveout = (d5minusc - maxaplusb) / max2d7
-			flachleaveout = (bflpdmc-maxaplusb)/max2d3 + 1
+			triangleleaveout = (d5minusc - maxaplusb) / max2d7
+			flatLeaveout = (bflpdmc-maxaplusb)/max2d3 + 1
 			faileaveout = (baipdmc-maxaplusb)/max2d3 + 1
-			leaveout = MIN(flachleaveout, faileaveout)
-			leaveout = MAX(leaveout, dreieckleaveout)
+			leaveout = MIN(flatLeaveout, faileaveout)
+			leaveout = MAX(leaveout, triangleleaveout)
 			leaveout = MIN(leaveout, fsleaveout)
 			if leaveout < 1 {
 				leaveout = 1
 			}
 		}
 	}
-	//printbest(max1, max2, max3, max4, max5, maxroute, bestfai, bestflach, pnts, distance)
 
 	freeFlightKm := float64(maxroute) / 1000.0
-	freeTriangleKm := float64(bestflach) / 1000.0
+	freeTriangleKm := float64(bestFlat) / 1000.0
 	FAITriangleKm := float64(bestfai) / 1000.0
 
 	freeFlightPoints := freeFlightKm * 1.5
@@ -233,7 +138,7 @@ func LeonardoOptimize(data []tracks.Datum) []tracks.Datum {
 		fmt.Println("OUT BEST_FLIGHT_TYPE FREE_FLIGHT")
 	} else if freeTrianglePoints > FAITrianglePoints {
 		/*
-		 * Die Dreiecke bestehen aus den Schenkeln a, b und c. Von dieser Strecke
+		 * Die trianglee bestehen aus den Schenkeln a, b und c. Von dieser Strecke
 		 * wird die Distanz d zwischen Start- und Endpunkt abgezogen
 		 */
 		fmt.Println("OUT BEST_FLIGHT_TYPE FREE_TRIANGLE")
@@ -267,29 +172,29 @@ func LeonardoOptimize(data []tracks.Datum) []tracks.Datum {
 	fmt.Printf("OUT FLIGHT_KM %f\n", freeTriangleKm)
 	fmt.Printf("OUT FLIGHT_POINTS %f\n", freeTrianglePoints)
 
-	fmt.Printf("DEBUG Best free Triangle: %f km = %f Points\n", float64(bestflach)/1000.0, float64(bestflach)/1000.0*1.75)
+	fmt.Printf("DEBUG Best free Triangle: %f km = %f Points\n", float64(bestFlat)/1000.0, float64(bestFlat)/1000.0*1.75)
 	fmt.Printf("OUT ")
 
-	printpoint(max1flach)
+	printpoint(max1Flat)
 	fmt.Printf("\n")
 	fmt.Printf("OUT ")
-	printpoint(max2flach)
-	fmt.Printf(" %f km=d\n", float64(distance[max1flach+pnts*max5flach])/1000.0)
+	printpoint(max2Flat)
+	fmt.Printf(" %f km=d\n", float64(distance[max1Flat+pnts*max5Flat])/1000.0)
 	fmt.Printf("OUT ")
-	printpoint(max3flach)
-	fmt.Printf(" %f km=a\n", float64(distance[max2flach+pnts*max3flach])/1000.0)
+	printpoint(max3Flat)
+	fmt.Printf(" %f km=a\n", float64(distance[max2Flat+pnts*max3Flat])/1000.0)
 	fmt.Printf("OUT ")
-	printpoint(max4flach)
-	fmt.Printf(" %f km=b\n", float64(distance[max3flach+pnts*max4flach])/1000.0)
+	printpoint(max4Flat)
+	fmt.Printf(" %f km=b\n", float64(distance[max3Flat+pnts*max4Flat])/1000.0)
 	fmt.Printf("OUT ")
-	printpoint(max5flach)
-	fmt.Printf(" %f km=c\n", float64(distance[max2flach+pnts*max4flach])/1000.0)
+	printpoint(max5Flat)
+	fmt.Printf(" %f km=c\n", float64(distance[max2Flat+pnts*max4Flat])/1000.0)
 
 	fmt.Printf("OUT TYPE FAI_TRIANGLE\n")
 	fmt.Printf("OUT FLIGHT_KM %f\n", FAITriangleKm)
 	fmt.Printf("OUT FLIGHT_POINTS %f\n", FAITrianglePoints)
 
-	fmt.Printf("bestes FAI Dreieck: %f km = %f Punkte\n", float64(bestfai)/1000.0, float64(bestfai)/1000.0*2.0)
+	fmt.Printf("bestes FAI triangle: %f km = %f Punkte\n", float64(bestfai)/1000.0, float64(bestfai)/1000.0*2.0)
 	fmt.Printf("OUT ")
 	printpoint(max1fai)
 	fmt.Printf("\n")
@@ -322,7 +227,7 @@ type PointList struct {
 }
 
 // initialize distance matrix values
-func initDmVal(data []tracks.Datum) ([]int, int, int) {
+func initDistMatrix(data []tracks.Datum) ([]int, int, int) {
 	fmt.Println("Initializing distance matrix values...")
 	dFak := 6371000.0
 	piDiv180 := math.Pi / 180.0
@@ -353,7 +258,6 @@ func initDmVal(data []tracks.Datum) ([]int, int, int) {
 		sinLat[i] = math.Sin(latRad[i])
 		cosLat[i] = math.Cos(latRad[i])
 		//pointList = pointList.next
-
 	}
 
 	maxDist := 0  /* recalculate the maximum distance between any two points */
@@ -395,7 +299,6 @@ func initDmVal(data []tracks.Datum) ([]int, int, int) {
 				maxDist = dist /* ggf. weiteste Distanz merken */
 			}
 		}
-		/* DEBUG if (i+1==j) { comparedistances(i,j); } */
 
 	}
 	if max2Dist > maxDist {
@@ -453,7 +356,6 @@ func initDMin(pnts int, distance []int, maxDist int) ([][]int, [][]int, [][]int)
 	for i := range dMinJ {
 		dMinJ[i] = make([]int, pnts)
 	}
-	//var dMinIndex []int
 
 	var i, j, d, mini, minj int
 	minimum := maxDist
@@ -465,7 +367,7 @@ func initDMin(pnts int, distance []int, maxDist int) ([][]int, [][]int, [][]int)
 			minimum = d
 			minj = j
 		}
-		//dMin[] = minimum
+		dMin[0][j] = minimum
 		dMinI[0][j] = 0
 		dMinJ[0][j] = minj
 
@@ -512,12 +414,8 @@ func initDMin(pnts int, distance []int, maxDist int) ([][]int, [][]int, [][]int)
 }
 
 func initMaxEnd(pnts int, distance []int, max2Dist int) ([]int, []int, int) {
-	//	pnts := len(data)  // TODO dry
-	//	max2Dist := 0      // TODO pass this VALUE!!!
-	//	var distance []int // TODO pass this VALUE!!!
-
-	maxenddist := make([]int, pnts)
-	maxendpunkt := make([]int, pnts)
+	maxEndDist := make([]int, pnts)
+	maxEndPoint := make([]int, pnts)
 
 	var w3, i, f, maxf, besti, leaveout int
 	fmt.Println("initializing maxenddist[] with maximal distance to best endpoint ...")
@@ -537,99 +435,11 @@ func initMaxEnd(pnts int, distance []int, max2Dist int) ([]int, []int, int) {
 				leaveout = 1
 			}
 		}
-		maxenddist[w3] = maxf
-		maxendpunkt[w3] = besti
+		maxEndDist[w3] = maxf
+		maxEndPoint[w3] = besti
 	}
-	return maxenddist, maxendpunkt, leaveout
+	return maxEndDist, maxEndPoint, leaveout
 }
-
-// func firstguess(data []tracks.Datum) int {
-// 	pnts := len(data) // TODO
-// 	var distance []int
-// 	var a, b, c, d, u, tmp int
-// 	var bestfai, bestflach int
-// 	/* geratene L�sung f�r freie Strecke: */
-// 	/* max1 = 0;       /* Start ganz vorne */
-// 	/* max2 = pnts/4;  /* Erste Wende nach einem 4tel der Strecke */
-// 	/* max3 = pnts/2;  /* Zweite Wende etwa in der Mitte */
-// 	/* max4 = pnts*3/4;/* Dritte Wende etwa nach 3/4teln der Strecke */
-// 	/* max5 = pnts-1;  /* Endpunkt ganz hinten */
-
-// 	max1 := pnts * 3 / 8 /* Start ganz vorne */
-// 	max2 := pnts * 4 / 8 /* Erste Wende nach einem 4tel der Strecke */
-// 	max3 := pnts * 5 / 8 /* Zweite Wende etwa in der Mitte */
-// 	max4 := pnts * 6 / 8 /* Dritte Wende etwa nach 3/4teln der Strecke */
-// 	max5 := pnts - 1     /* Endpunkt ganz hinten */
-// 	maxroute := distance[max1+pnts*max2] + distance[max2+pnts*max3] + distance[max3+pnts*max4] + distance[max4+pnts*max5]
-
-// 	/* geratene L�sung f�r ein Dreieck begonnen auf einem Schenkel */
-// 	i1 := 0            /* Start ganz vorne */
-// 	i2 := pnts / 6     /* Erste Wende nach einem Sechstel */
-// 	i3 := pnts / 2     /* Zweite Wende in der Mitte */
-// 	i4 := pnts * 5 / 6 /* Dritte Wende */
-// 	i5 := pnts - 1     /* Endpunkt ganz hinten */
-// 	a = distance[i2+pnts*i3]
-// 	b = distance[i3+pnts*i4]
-// 	c = distance[i2+pnts*i4]
-// 	d = distance[i1+pnts*i5]
-
-// 	u = a + b + c
-
-// 	if d*5 <= u { /* zuf�llig ein Dreieck gefunden? */
-// 		tmp = u * 7
-// 		if (a*25 >= tmp) && (b*25 >= tmp) && (c*25 >= tmp) { /* zuf�llig FAI-D gefunden? */
-// 			bestfai := u - d
-// 			max1fai := i1
-// 			max2fai := i2
-// 			max3fai := i3
-// 			max4fai := i4
-// 			max5fai := i5
-// 		} else { /* Flaches Dreieck */
-// 			bestflach := u - d
-// 			max1flach := i1
-// 			max2flach := i2
-// 			max3flach := i3
-// 			max4flach := i4
-// 			max5flach := i5
-// 		}
-// 		//return FAI, flach
-// 	}
-
-// 	/* geratene L�sung f�r eine Dreieck begonnen an erster Wende */
-// 	i1 = 0
-// 	i2 = 0            /* Start und erste Wende ganz vorne */
-// 	i3 = pnts / 3     /* zweite Wende nach 1/3 der Strecke */
-// 	i4 = pnts * 2 / 3 /* dritte Wende nach 2/3 der Strecke */
-// 	i5 = pnts - 1     /* Endpunkt ganz hinten */
-// 	a = distance[i2+pnts*i3]
-// 	b = distance[i3+pnts*i4]
-// 	c = distance[i2+pnts*i4]
-// 	d = distance[i1+pnts*i5]
-// 	u = a + b + c
-// 	if d*5 <= u { /* zuf�llig ein Dreieck gefunden? */
-// 		tmp = u * 7
-// 		if (a*25 >= tmp) && (b*25 >= tmp) && (c*25 >= tmp) { /* zuf�llig FAI-D gefunden? */
-// 			if (u - d) > bestfai {
-// 				bestfai := u - d
-// 				max1fai := i1
-// 				max2fai := i2
-// 				max3fai := i3
-// 				max4fai := i4
-// 				max5fai := i5
-// 			}
-// 		} else { /* Flaches Dreieck */
-// 			if (u - d) > bestflach {
-// 				bestflach := u - d
-// 				max1flach := i1
-// 				max2flach := i2
-// 				max3flach := i3
-// 				max4flach := i4
-// 				max5flach := i5
-// 			}
-// 		}
-// 	}
-// 	return maxroute
-// }
 
 func MIN(x, y int) int {
 	if x < y {
@@ -644,7 +454,7 @@ func MAX(x, y int) int {
 	return y
 }
 
-// setter fns (I think)
+// setter fns
 func dMin(v, x, y, pnts int, distance []int) {
 	distance[y+pnts*x] = v
 }
@@ -672,20 +482,6 @@ func maxend(v int, maxenddist []int) int {
 func maxendi(v int, maxendpunkt []int) int {
 	return maxendpunkt[(v)]
 }
-
-/*
-* Best Score for free distance, flat triangle and FAI triangle
-* spend exactly with total distance in km and score on 1000stel
-* with the OLC points are rounded on 100stel, more?ber rounding
-* No statement is made stages, which seems OLC server to however already round
-* stages on 100stel km = dezimeter.
-* Nevertheless in meters and not in dezimetern one counts here,
-* comes there it otherwise to rounding errors.
- */
-
-// func printbest(max1, max2, max3, max4, max5, maxroute, bestfai, bestflach, pnts int, distance []int) {
-
-// }
 
 func printpoint(i int) {
 	fmt.Printf("INDEX %v", i)
